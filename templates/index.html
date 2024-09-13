@@ -1,0 +1,24 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV to Anki Deck Converter</title>
+</head>
+<body>
+    <h1>CSV to Anki Deck Converter</h1>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+    <form method="post">
+        <label for="deck_name">Deck Name:</label><br>
+        <input type="text" id="deck_name" name="deck_name" value="{{ deck_name | default('') }}" required><br><br>
+
+        <label for="csv_text">CSV Text:</label><br>
+        <textarea id="csv_text" name="csv_text" rows="15" cols="80" required>{{ csv_text | default('') }}</textarea><br><br>
+
+        <input type="submit" value="Generate Deck">
+    </form>
+</body>
+</html>

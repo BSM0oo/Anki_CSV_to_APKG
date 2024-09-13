@@ -1,0 +1,4 @@
+app.yaml
+.gcloudignore
+pyproject.toml
+__pycache__
