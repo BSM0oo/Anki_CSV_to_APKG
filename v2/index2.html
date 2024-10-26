@@ -1,0 +1,41 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV to Anki Deck Converter</title>
+</head>
+<body>
+    <h1>CSV to Anki Deck Converter</h1>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <p>Please provide your flashcards either by uploading a CSV file or by entering CSV text. The expected format is:</p>
+    <ul>
+        <li>The CSV should have a header row with columns named <strong>'Front'</strong> and <strong>'Back'</strong>.</li>
+        <li>Each subsequent row represents a flashcard.</li>
+        <li>Example CSV content:
+            <pre>
+Front,Back
+What is the capital of France?,Paris
+What is 2+2?,4
+            </pre>
+        </li>
+    </ul>
+
+    <form method="post" enctype="multipart/form-data">
+        <label for="deck_name">Deck Name:</label><br>
+        <input type="text" id="deck_name" name="deck_name" value="{{ deck_name | default('') }}" required><br><br>
+
+        <label for="csv_file">Upload CSV File:</label><br>
+        <input type="file" id="csv_file" name="csv_file" accept=".csv"><br><br>
+
+        <label for="csv_text">Or Enter CSV Text:</label><br>
+        <textarea id="csv_text" name="csv_text" rows="15" cols="80">{{ csv_text | default('') }}</textarea><br><br>
+
+        <input type="submit" value="Generate Deck">
+    </form>
+</body>
+</html>

@@ -1,24 +1,80 @@
-<!-- templates/index.html -->
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>CSV to Anki Deck Converter</title>
+    <title>Anki Deck Generator</title>
 </head>
 <body>
-    <h1>CSV to Anki Deck Converter</h1>
+    <h1>Create an Anki Deck</h1>
     {% if error %}
-        <p style="color:red;">{{ error }}</p>
+        <p style="color: red;">{{ error }}</p>
     {% endif %}
-    <form method="post">
-        <label for="deck_name">Deck Name:</label><br>
-        <input type="text" id="deck_name" name="deck_name" value="{{ deck_name | default('') }}" required><br><br>
-
-        <label for="csv_text">CSV Text:</label><br>
-        <textarea id="csv_text" name="csv_text" rows="15" cols="80" required>{{ csv_text | default('') }}</textarea><br><br>
-
-        <input type="submit" value="Generate Deck">
+    <form method="post" enctype="multipart/form-data">
+        <label for="deck_name">Deck Name:</label>
+        <input type="text" name="deck_name" value="{{ deck_name }}">
+        <br><br>
+        
+        <label for="input_type">Input Type:</label>
+        <input type="radio" name="input_type" value="csv" {% if input_type == 'csv' or not input_type %}checked{% endif %}> CSV
+        <input type="radio" name="input_type" value="tuple" {% if input_type == 'tuple' %}checked{% endif %}> Python Tuple/List
+        <br><br>
+        
+        <label for="csv_text">Paste CSV or Python Tuple/List here:</label><br>
+        <textarea name="csv_text" rows="18" cols="90">{{ csv_text }}</textarea>
+        <br><br>
+        {% if input_type == 'csv' %}
+        <label for="csv_file">Or upload a CSV file:</label>
+        <input type="file" name="csv_file">
+        <br><br>
+        {% endif %}
+        <input type="submit" value="Create Anki Deck">
     </form>
+<div id="instructions" class="instructions">
+        <h2>Formatting Instructions</h2>
+        <ol>
+            <li><strong>Headers:</strong> Start with <code>Front,Back</code>. OR use tuple() or list[]</li>
+            <li><strong>Use Quotes:</strong> Enclose each field in double quotes <code>"..."</code>.</li>
+            <li><strong>Special Characters:</strong> Use HTML entities for special characters like <code>&lt;</code>, <code>&gt;</code>, and <code>&amp;</code> if you want them displayed as text.</li>
+            <li><strong>HTML Formatting:</strong> You can use HTML tags to format your content (e.g., <code>&lt;b&gt;</code> for bold, <code>&lt;i&gt;</code> for italics).</li>
+            <li><strong>Line Breaks:</strong> Insert line breaks by pressing 'Enter' within quoted fields.</li>
+            <li><strong>Escape Quotes:</strong> Use double double-quotes <code>""</code> to represent a double quote inside a field.</li>
+            <li><strong>Consistency:</strong> Ensure each row has both 'Front' and 'Back' fields.</li>
+            <li><strong>Encoding:</strong> Save your CSV with UTF-8 encoding.</li>
+            <li><strong>Example:</strong></li>
+        </ol>
+        <pre>
+<h3>CSV</h3>
+            Front,Back
+"Define inertia.","Inertia is the resistance of any object to change its motion.
+It includes changes to speed or direction."
+"Who said ""To be, or not to be""?","William Shakespeare - in a play called 'Hamlet'"
+"Highlight important text with bold.","You can make text <b>bold</b> by using the &lt;b&gt; tag."
+"Change text color in your flashcards.","Use &lt;span style='color:red;'&gt;red text&lt;/span&gt; to change text color."
+"Include a link in your card.","Click &lt;a href='https://www.example.com'&gt;here&lt;/a&gt; to visit an example website."
+"Use special characters like less than (&lt;) and greater than (&gt;).","Display special characters using HTML entities: &amp;lt; and &amp;gt;."
+
+<h3>OR TUPLES</h3>
+[
+    ("Define inertia.", "Inertia is the resistance of any object to change its motion."),
+    ("Who said 'To be, or not to be'?", "William Shakespeare - in a play called 'Hamlet'"),
+    ("Highlight important text with bold.", "You can make text <b>bold</b> by using the &lt;b&gt; tag."),
+    ("Change text color in your flashcards.", "Use &lt;span style='color:red;'&gt;red text&lt;/span&gt; to change text color."),
+    ("Include a link in your card.", "Click &lt;a href='https://www.example.com'&gt;here&lt;/a&gt; to visit an example website."),
+    ("Use special characters like less than (&lt;) and greater than (&gt;).", "Display special characters using HTML entities: &amp;lt; and &amp;gt;."),
+]
+<h3>OR list[]</h3>
+[
+    ["Define inertia.", "Inertia is the resistance of any object to change its motion."],
+    ["Who said 'To be, or not to be'?", "William Shakespeare - in a play called 'Hamlet'"],
+    ["Highlight important text with bold.", "You can make text <b>bold</b> by using the &lt;b&gt; tag."],
+    ["Change text color in your flashcards.", "Use &lt;span style='color:red;'&gt;red text&lt;/span&gt; to change text color."],
+    ["Include a link in your card.", "Click &lt;a href='https://www.example.com'&gt;here&lt;/a&gt; to visit an example website."],
+]
+
+        </pre>
+    </div>
+
+"
+        </pre>
+    </div>
 </body>
 </html>

@@ -1,0 +1,82 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV to Anki Deck Converter</title>
+    <style>
+        .instructions {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        .toggle-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        pre {
+            background-color: #eef;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+    <script>
+        function toggleInstructions() {
+            var instr = document.getElementById("instructions");
+            var btn = document.getElementById("toggleButton");
+            if (instr.style.display === "none") {
+                instr.style.display = "block";
+                btn.textContent = "Hide Instructions";
+            } else {
+                instr.style.display = "none";
+                btn.textContent = "Show Instructions";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>CSV to Anki Deck Converter</h1>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        <label for="deck_name">Deck Name:</label><br>
+        <input type="text" id="deck_name" name="deck_name" value="{{ deck_name | default('') }}" required><br><br>
+
+        <label for="csv_file">Upload CSV File:</label><br>
+        <input type="file" id="csv_file" name="csv_file" accept=".csv"><br><br>
+
+        <label for="csv_text">Or Enter CSV Text:</label><br>
+        <textarea id="csv_text" name="csv_text" rows="15" cols="80">{{ csv_text | default('') }}</textarea><br><br>
+
+        <input type="submit" value="Generate Deck">
+    </form>
+
+    <button id="toggleButton" class="toggle-button" onclick="toggleInstructions()">Show Instructions</button>
+
+    <div id="instructions" class="instructions">
+        <h2>Formatting Instructions</h2>
+        <ol>
+            <li><strong>Headers:</strong> Start with <code>Front,Back</code>.</li>
+            <li><strong>Use Quotes:</strong> Enclose fields with commas, quotes, or line breaks in double quotes. The entirety of the front of the card should be in quotes. Dont use double quotes elsewhere, use single quotes for direct quotes within the card. For the back of the card, similarly the content should be enclosed in double quotes. Don't use double quotes elsewhere on the back. Use single quotes for direct quotes within the card.   (<code>"</code>).</li>
+            <li><strong>Escape Quotes:</strong> Use double quotes to represent a quote inside a field (<code>""</code>).</li>
+            <li><strong>Line Breaks:</strong> Insert line breaks by pressing 'Enter' within quoted fields.</li>
+            <li><strong>Consistency:</strong> Ensure each row has both 'Front' and 'Back' fields.</li>
+            <li><strong>Encoding:</strong> Save your CSV with UTF-8 encoding.</li>
+            <li><strong>Example:</strong></li>
+        </ol>
+        <pre>
+Front,Back
+"Define inertia.","Inertia is the resistance of any object to change its motion.
+It includes changes to speed or direction."
+"Who said ""To be, or not to be""?","William Shakespeare - in a play called 'Hamlet'"
+"Which programs are included in mandatory spending?","Social Security, Medicare, Medicaid, Veterans care"
+        </pre>
+    </div>
+</body>
+</html>

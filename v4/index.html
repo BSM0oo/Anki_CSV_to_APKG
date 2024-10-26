@@ -1,0 +1,92 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSV to Anki Deck Converter</title>
+    <style>
+        .instructions {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        .toggle-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        pre {
+            background-color: #eef;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            font-family: monospace;
+        }
+    </style>
+    <script>
+        function toggleInstructions() {
+            var instr = document.getElementById("instructions");
+            var btn = document.getElementById("toggleButton");
+            if (instr.style.display === "none") {
+                instr.style.display = "block";
+                btn.textContent = "Hide Instructions";
+            } else {
+                instr.style.display = "none";
+                btn.textContent = "Show Instructions";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>CSV to Anki Deck Converter</h1>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        <label for="deck_name">Deck Name:</label><br>
+        <input type="text" id="deck_name" name="deck_name" value="{{ deck_name | default('') }}" required><br><br>
+
+        <label for="csv_file">Upload CSV File:</label><br>
+        <input type="file" id="csv_file" name="csv_file" accept=".csv"><br><br>
+
+        <label for="csv_text">Or Enter CSV Text:</label><br>
+        <textarea id="csv_text" name="csv_text" rows="15" cols="80">{{ csv_text | default('') }}</textarea><br><br>
+
+        <input type="submit" value="Generate Deck">
+    </form>
+
+    <button id="toggleButton" class="toggle-button" onclick="toggleInstructions()">Show Instructions</button>
+
+    <div id="instructions" class="instructions">
+        <h2>Formatting Instructions</h2>
+        <ol>
+            <li><strong>Headers:</strong> Start with <code>Front,Back</code>.</li>
+            <li><strong>Use Quotes:</strong> Enclose each field in double quotes <code>"..."</code>.</li>
+            <li><strong>Special Characters:</strong> Use HTML entities for special characters like <code>&lt;</code>, <code>&gt;</code>, and <code>&amp;</code> if you want them displayed as text.</li>
+            <li><strong>HTML Formatting:</strong> You can use HTML tags to format your content (e.g., <code>&lt;b&gt;</code> for bold, <code>&lt;i&gt;</code> for italics).</li>
+            <li><strong>Line Breaks:</strong> Insert line breaks by pressing 'Enter' within quoted fields.</li>
+            <li><strong>Escape Quotes:</strong> Use double double-quotes <code>""</code> to represent a double quote inside a field.</li>
+            <li><strong>Consistency:</strong> Ensure each row has both 'Front' and 'Back' fields.</li>
+            <li><strong>Encoding:</strong> Save your CSV with UTF-8 encoding.</li>
+            <li><strong>Example:</strong></li>
+        </ol>
+        <pre>
+Front,Back
+"Define inertia.","Inertia is the resistance of any object to change its motion.
+It includes changes to speed or direction."
+"Who said ""To be, or not to be""?","William Shakespeare - in a play called 'Hamlet'"
+"Highlight important text with bold.","You can make text <b>bold</b> by using the &lt;b&gt; tag."
+"Change text color in your flashcards.","Use &lt;span style='color:red;'&gt;red text&lt;/span&gt; to change text color."
+"Include a link in your card.","Click &lt;a href='https://www.example.com'&gt;here&lt;/a&gt; to visit an example website."
+"Use special characters like less than (&lt;) and greater than (&gt;).","Display special characters using HTML entities: &amp;lt; and &amp;gt;."
+        </pre>
+    </div>
+</body>
+</html>
