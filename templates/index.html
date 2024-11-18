@@ -1,80 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anki Deck Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .code-example {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        .flash-message {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.375rem;
+        }
+        
+        .flash-error {
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .flash-success {
+            background-color: #dcfce7;
+            border: 1px solid #22c55e;
+            color: #166534;
+        }
+    </style>
 </head>
-<body>
-    <h1>Create an Anki Deck</h1>
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    <form method="post" enctype="multipart/form-data">
-        <label for="deck_name">Deck Name:</label>
-        <input type="text" name="deck_name" value="{{ deck_name }}">
-        <br><br>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Anki Deck Generator</h1>
         
-        <label for="input_type">Input Type:</label>
-        <input type="radio" name="input_type" value="csv" {% if input_type == 'csv' or not input_type %}checked{% endif %}> CSV
-        <input type="radio" name="input_type" value="tuple" {% if input_type == 'tuple' %}checked{% endif %}> Python Tuple/List
-        <br><br>
-        
-        <label for="csv_text">Paste CSV or Python Tuple/List here:</label><br>
-        <textarea name="csv_text" rows="18" cols="90">{{ csv_text }}</textarea>
-        <br><br>
-        {% if input_type == 'csv' %}
-        <label for="csv_file">Or upload a CSV file:</label>
-        <input type="file" name="csv_file">
-        <br><br>
+        {% if error %}
+        <div class="flash-message flash-error">
+            {{ error }}
+        </div>
         {% endif %}
-        <input type="submit" value="Create Anki Deck">
-    </form>
-<div id="instructions" class="instructions">
-        <h2>Formatting Instructions</h2>
-        <ol>
-            <li><strong>Headers:</strong> Start with <code>Front,Back</code>. OR use tuple() or list[]</li>
-            <li><strong>Use Quotes:</strong> Enclose each field in double quotes <code>"..."</code>.</li>
-            <li><strong>Special Characters:</strong> Use HTML entities for special characters like <code>&lt;</code>, <code>&gt;</code>, and <code>&amp;</code> if you want them displayed as text.</li>
-            <li><strong>HTML Formatting:</strong> You can use HTML tags to format your content (e.g., <code>&lt;b&gt;</code> for bold, <code>&lt;i&gt;</code> for italics).</li>
-            <li><strong>Line Breaks:</strong> Insert line breaks by pressing 'Enter' within quoted fields.</li>
-            <li><strong>Escape Quotes:</strong> Use double double-quotes <code>""</code> to represent a double quote inside a field.</li>
-            <li><strong>Consistency:</strong> Ensure each row has both 'Front' and 'Back' fields.</li>
-            <li><strong>Encoding:</strong> Save your CSV with UTF-8 encoding.</li>
-            <li><strong>Example:</strong></li>
-        </ol>
-        <pre>
-<h3>CSV</h3>
-            Front,Back
-"Define inertia.","Inertia is the resistance of any object to change its motion.
-It includes changes to speed or direction."
-"Who said ""To be, or not to be""?","William Shakespeare - in a play called 'Hamlet'"
-"Highlight important text with bold.","You can make text <b>bold</b> by using the &lt;b&gt; tag."
-"Change text color in your flashcards.","Use &lt;span style='color:red;'&gt;red text&lt;/span&gt; to change text color."
-"Include a link in your card.","Click &lt;a href='https://www.example.com'&gt;here&lt;/a&gt; to visit an example website."
-"Use special characters like less than (&lt;) and greater than (&gt;).","Display special characters using HTML entities: &amp;lt; and &amp;gt;."
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                <div>
+                    <label for="deck_name" class="block text-sm font-medium text-gray-700">Deck Name:</label>
+                    <input type="text" 
+                        name="deck_name" 
+                        id="deck_name" 
+                        value="{{ deck_name }}"
+                        placeholder="Leave blank for auto-generated name (e.g., Gen_Deck_2024-10-26_14-30-00)"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <p class="mt-1 text-sm text-gray-500">
+                        Leave empty to use current date/time as deck name
+                    </p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Input Type:</label>
+                    <div class="space-x-4">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="input_type" value="csv" class="form-radio text-blue-600"
+                                   {% if input_type == 'csv' or not input_type %}checked{% endif %}>
+                            <span class="ml-2">CSV</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="input_type" value="tuple" class="form-radio text-blue-600"
+                                   {% if input_type == 'tuple' %}checked{% endif %}>
+                            <span class="ml-2">Python Tuple/List</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="csv_text" class="block text-sm font-medium text-gray-700">
+                        Paste CSV or Python Tuple/List here:
+                    </label>
+                    <textarea name="csv_text" id="csv_text" rows="12"
+                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ csv_text }}</textarea>
+                </div>
+                
+                {% if input_type == 'csv' %}
+                <div>
+                    <label for="csv_file" class="block text-sm font-medium text-gray-700">Or upload a CSV file:</label>
+                    <input type="file" name="csv_file" id="csv_file"
+                           class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                </div>
+                {% endif %}
+                
+                <div>
+                    <button type="submit"
+                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Create Anki Deck
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Formatting Instructions</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-medium mb-2 text-gray-700">General Guidelines</h3>
+                    <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                        <li>For CSV: Start with header row <code class="bg-gray-100 px-1 rounded">Front,Back</code></li>
+                        <li>For Python format: Use tuples <code class="bg-gray-100 px-1 rounded">()</code> or lists <code class="bg-gray-100 px-1 rounded">[]</code></li>
+                        <li>Use HTML tags for formatting (<code class="bg-gray-100 px-1 rounded">&lt;b&gt;</code>, <code class="bg-gray-100 px-1 rounded">&lt;i&gt;</code>, etc.)</li>
+                        <li>Save files in UTF-8 encoding</li>
+                        <li>" Use HTML for Code Blocks"
+"In Anki's card editor, switch to the "HTML Editor" (or simply add HTML directly)."
+"Wrap your code in <pre><code> tags for monospace and line breaks"</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-medium mb-2 text-gray-700">CSV Format Example</h3>
+                    <div class="code-example">Front,Back
+"What is inertia?","The resistance of an object to change in motion"
+"HTML formatting example","This text can be &lt;b&gt;bold&lt;/b&gt; or &lt;i&gt;italic&lt;/i&gt;"
+"Special characters","Use &amp;lt; for &lt; and &amp;gt; for &gt;"
+</div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-medium mb-2 text-gray-700">Python Tuple Format Examples</h3>
+                    <div class="code-example"># Example 1 - Simple tuple
+flashcards = (
+    ("What is inertia?", "The resistance of an object to change in motion"),
+    ("HTML formatting", "This text can be <b>bold</b> or <i>italic</i>")
+)
 
-<h3>OR TUPLES</h3>
+# Example 2 - List format
 [
-    ("Define inertia.", "Inertia is the resistance of any object to change its motion."),
-    ("Who said 'To be, or not to be'?", "William Shakespeare - in a play called 'Hamlet'"),
-    ("Highlight important text with bold.", "You can make text <b>bold</b> by using the &lt;b&gt; tag."),
-    ("Change text color in your flashcards.", "Use &lt;span style='color:red;'&gt;red text&lt;/span&gt; to change text color."),
-    ("Include a link in your card.", "Click &lt;a href='https://www.example.com'&gt;here&lt;/a&gt; to visit an example website."),
-    ("Use special characters like less than (&lt;) and greater than (&gt;).", "Display special characters using HTML entities: &amp;lt; and &amp;gt;."),
-]
-<h3>OR list[]</h3>
-[
-    ["Define inertia.", "Inertia is the resistance of any object to change its motion."],
-    ["Who said 'To be, or not to be'?", "William Shakespeare - in a play called 'Hamlet'"],
-    ["Highlight important text with bold.", "You can make text <b>bold</b> by using the &lt;b&gt; tag."],
-    ["Change text color in your flashcards.", "Use &lt;span style='color:red;'&gt;red text&lt;/span&gt; to change text color."],
-    ["Include a link in your card.", "Click &lt;a href='https://www.example.com'&gt;here&lt;/a&gt; to visit an example website."],
+    ["What is inertia?", "The resistance of an object to change in motion"],
+    ["HTML formatting", "This text can be <b>bold</b> or <i>italic</i>"]
 ]
 
-        </pre>
+# Example 3 - Single line format
+flashcards = [("Question 1", "Answer 1"), ("Question 2", "Answer 2")]</div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-medium mb-2 text-gray-700">Supported HTML Tags</h3>
+                    <ul class="list-disc pl-5 space-y-2 text-gray-600">
+                        <li><code class="bg-gray-100 px-1 rounded">&lt;b&gt;</code> - Bold text</li>
+                        <li><code class="bg-gray-100 px-1 rounded">&lt;i&gt;</code> - Italic text</li>
+                        <li><code class="bg-gray-100 px-1 rounded">&lt;u&gt;</code> - Underlined text</li>
+                        <li><code class="bg-gray-100 px-1 rounded">&lt;div&gt;</code> - Block element</li>
+                        <li><code class="bg-gray-100 px-1 rounded">&lt;br&gt;</code> - Line break</li>
+                        <li><code class="bg-gray-100 px-1 rounded">&lt;span style="..."&gt;</code> - Styled text</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
-"
-        </pre>
-    </div>
+    <script>
+        // Toggle CSV file upload field based on input type selection
+        document.querySelectorAll('input[name="input_type"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const csvFileDiv = document.querySelector('#csv_file').parentElement;
+                csvFileDiv.style.display = this.value === 'csv' ? 'block' : 'none';
+            });
+        });
+    </script>
 </body>
 </html>
