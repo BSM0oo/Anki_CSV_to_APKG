@@ -78,24 +78,25 @@ def format_text_for_anki(text):
 def create_deck_infrastructure(deck_name):
     """Create basic deck infrastructure with model and styling."""
     deck_id = random.randrange(1 << 30, 1 << 31)
-    model_id = random.randrange(1 << 30, 1 << 31)
+    model_id = 1234567890
     
     deck = genanki.Deck(deck_id, deck_name)
     
     # Enhanced model with better styling
     model = genanki.Model(
         model_id,
-        'Enhanced Model',
+        'Enhanced Model Billy',
         fields=[
             {'name': 'Front'},
             {'name': 'Back'},
         ],
         templates=[
             {
-                'name': 'Card 1',
+                'name': 'Card 2 audio added',
                 'qfmt': """
                     <div class="front-side">
                         {{Front}}
+                        {{tts en_US:Front}}
                     </div>
                 """,
                 'afmt': """
@@ -105,6 +106,7 @@ def create_deck_infrastructure(deck_name):
                     <hr id="answer">
                     <div class="back-side">
                         {{Back}}
+                        {{tts en_US:Back}}
                     </div>
                 """,
             },
